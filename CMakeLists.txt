@@ -21,7 +21,7 @@ set (SRCS
     "src/pcm.c"
     "src/pcm_hw.c"
     "src/pcm_plugin.c"
-    "src/snd_utils.c"
+    "src/snd_card_plugin.c"
     "src/mixer.c"
     "src/mixer_hw.c"
     "src/mixer_plugin.c")

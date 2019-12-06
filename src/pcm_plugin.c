@@ -45,7 +45,7 @@
 #include <tinyalsa/pcm_plugin.h>
 
 #include "pcm_io.h"
-#include "snd_utils.h"
+#include "snd_card_plugin.h"
 
 /* 2 words of uint32_t = 64 bits of mask */
 #define PCM_MASK_SIZE (2)

@@ -60,7 +60,7 @@
 #include <tinyalsa/pcm.h>
 #include <tinyalsa/limits.h>
 #include "pcm_io.h"
-#include "snd_utils.h"
+#include "snd_card_plugin.h"
 
 #ifndef PARAM_MAX
 #define PARAM_MAX SNDRV_PCM_HW_PARAM_LAST_INTERVAL

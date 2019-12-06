@@ -47,7 +47,7 @@
 #include <sound/asound.h>
 
 #include <tinyalsa/mixer_plugin.h>
-#include "snd_utils.h"
+#include "snd_card_plugin.h"
 
 #include "mixer_io.h"
 

@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "snd_utils.h"
+#include "snd_card_plugin.h"
 
 #define SND_DLSYM(h, p, s, err) \
 do {                            \

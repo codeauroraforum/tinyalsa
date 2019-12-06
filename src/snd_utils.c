@@ -56,7 +56,7 @@ int snd_utils_get_str(struct snd_node *node, const char *prop, char **val)
     return node->get_str(node->dev_node, prop, val);
 }
 
-void snd_utils_put_dev_node(struct snd_node *node)
+void snd_utils_close_dev_node(struct snd_node *node)
 {
     if (!node)
         return;
@@ -106,7 +106,7 @@ done:
     return err;
 }
 
-struct snd_node *snd_utils_get_dev_node(unsigned int card,
+struct snd_node *snd_utils_open_dev_node(unsigned int card,
         unsigned int device, int dev_type)
 {
     struct snd_node *node;

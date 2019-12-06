@@ -423,7 +423,7 @@ int mixer_plugin_open(unsigned int card, void **data,
         return -ENOMEM;
 
     /* mixer id is fixed to 1 in snd-card-def xml */
-    plug_data->mixer_node = snd_utils_get_dev_node(card, 1, NODE_MIXER);
+    plug_data->mixer_node = snd_utils_open_dev_node(card, 1, NODE_MIXER);
     if (!plug_data->mixer_node) {
         /* Do not print error here.
          * It is valid for card to not have virtual mixer node
@@ -484,7 +484,7 @@ int mixer_plugin_open(unsigned int card, void **data,
     return 0;
 
 err_get_name:
-    snd_utils_put_dev_node(plug_data->mixer_node);
+    snd_utils_close_dev_node(plug_data->mixer_node);
     dlclose(dl_hdl);
 
 err_get_mixer_node:

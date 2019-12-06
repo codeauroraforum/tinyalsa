@@ -66,10 +66,10 @@ enum snd_node_type {
     SND_NODE_TYPE_INVALID,
 };
 
-struct snd_node *snd_utils_get_dev_node(unsigned int card,
+struct snd_node *snd_utils_open_dev_node(unsigned int card,
         unsigned int device, int dev_type);
 
-void snd_utils_put_dev_node(struct snd_node *node);
+void snd_utils_close_dev_node(struct snd_node *node);
 
 enum snd_node_type snd_utils_get_node_type(struct snd_node *node);
 

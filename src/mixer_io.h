@@ -27,8 +27,8 @@
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-#ifndef __MIXER_H__
-#define __MIXER_H__
+#ifndef TINYALSA_SRC_MIXER_H
+#define TINYALSA_SRC_MIXER_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,4 +48,4 @@ struct mixer_ops {
     int (*ioctl) (void *data, unsigned int cmd, ...);
 };
 
-#endif /* end of __MIXER_H__ */
+#endif /* TINYALSA_SRC_MIXER_H */

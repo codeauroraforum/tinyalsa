@@ -27,8 +27,8 @@
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-#ifndef __SND_CARD_UTILS_H__
-#define __SND_CARD_UTILS_H__
+#ifndef TINYALSA_SRC_SND_CARD_UTILS_H
+#define TINYALSA_SRC_SND_CARD_UTILS_H
 
 #include <dlfcn.h>
 
@@ -77,4 +77,4 @@ int snd_utils_get_int(struct snd_node *node, const char *prop, int *val);
 
 int snd_utils_get_str(struct snd_node *node, const char *prop, char **val);
 
-#endif /* end of __SND_CARD_UTILS_H__ */
+#endif /* end of TINYALSA_SRC_SND_CARD_UTILS_H */

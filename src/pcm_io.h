@@ -1,4 +1,4 @@
-/* pcm.h
+/* pcm_io.h
 ** Copyright (c) 2019, The Linux Foundation.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,8 @@
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-#ifndef __PCM_H__
-#define __PCM_H__
+#ifndef TINYALSA_SRC_PCM_IO_H
+#define TINYALSA_SRC_PCM_IO_H
 
 #include <sound/asound.h>
 
@@ -42,4 +42,4 @@ struct pcm_ops {
 extern const struct pcm_ops hw_ops;
 extern const struct pcm_ops plug_ops;
 
-#endif /* end of __PCM_H__ */
+#endif /* TINYALSA_SRC_PCM_IO_H */

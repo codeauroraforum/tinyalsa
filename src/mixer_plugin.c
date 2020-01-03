@@ -27,6 +27,8 @@
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+#include <tinyalsa/plugin.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -46,10 +48,130 @@
 #include <linux/ioctl.h>
 #include <sound/asound.h>
 
-#include <tinyalsa/mixer_plugin.h>
 #include "snd_card_plugin.h"
-
 #include "mixer_io.h"
+
+/** Creates entry point function for the plugin */
+#define MIXER_PLUGIN_OPEN_FN(name)                             \
+    int name##_open(struct mixer_plugin **plugin,              \
+                    unsigned int card)
+
+/** Creates pointer to the entry point function of the plugin */
+#define MIXER_PLUGIN_OPEN_FN_PTR()                              \
+    int (*mixer_plugin_open_fn) (struct mixer_plugin **plugin,  \
+                                 unsigned int card)
+
+/* static initializers */
+
+#define SND_VALUE_ENUM(etexts, eitems)    \
+    {.texts = etexts, .items = eitems}
+
+#define SND_VALUE_BYTES(csize)    \
+    {.size = csize }
+
+#define SND_VALUE_INTEGER(icount, imin, imax, istep) \
+    {.count = icount, .min = imin, .max = imax, .step = istep }
+
+#define SND_VALUE_TLV_BYTES(csize, cget, cput)       \
+    {.size = csize, .get = cget, .put = cput }
+
+#define SND_CONTROL_ENUM(cname, cget, cput, cenum, priv_val, priv_data)   \
+    {    .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                             \
+        .access = SNDRV_CTL_ELEM_ACCESS_READWRITE,                        \
+        .type = SNDRV_CTL_ELEM_TYPE_ENUMERATED,                           \
+        .name = cname, .value = &cenum, .get = cget, .put = cput,         \
+        .private_value = priv_val, .private_data = priv_data,             \
+    }
+
+#define SND_CONTROL_BYTES(cname, cget, cput, cbytes, priv_val, priv_data) \
+    {                                                                     \
+        .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                              \
+        .access = SNDRV_CTL_ELEM_ACCESS_READWRITE,                        \
+        .type = SNDRV_CTL_ELEM_TYPE_BYTES,                                \
+        .name = cname, .value = &cbytes, .get = cget, .put = cput,        \
+        .private_value = priv_val, .private_data = priv_data,             \
+    }
+
+#define SND_CONTROL_INTEGER(cname, cget, cput, cint, priv_val, priv_data) \
+    {                                                                        \
+        .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                                 \
+        .access = SNDRV_CTL_ELEM_ACCESS_READWRITE,                           \
+        .type = SNDRV_CTL_ELEM_TYPE_INTEGER,                                 \
+        .name = cname, .value = &cint, .get = cget, .put = cput,             \
+        .private_value = priv_val, .private_data = priv_data,                \
+    }
+
+#define SND_CONTROL_TLV_BYTES(cname, cbytes, priv_val, priv_data)  \
+    {                                                                        \
+        .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                                 \
+        .access = SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE,                       \
+        .type = SNDRV_CTL_ELEM_TYPE_BYTES,                                   \
+        .name = cname, .value = &cbytes,                                     \
+        .private_value = priv_val, .private_data = priv_data,                \
+    }
+
+/* pointer based initializers */
+#define INIT_SND_CONTROL_INTEGER(c, cname, cget, cput, cint, pval, pdata)   \
+    {                                                                       \
+        c->iface = SNDRV_CTL_ELEM_IFACE_MIXER;                              \
+        c->access = SNDRV_CTL_ELEM_ACCESS_READWRITE;                        \
+        c->type = SNDRV_CTL_ELEM_TYPE_INTEGER;                              \
+        c->name = cname; c->value = &cint; c->get = cget; c->put = cput;    \
+        c->private_value = pval; c->private_data = pdata;                   \
+    }
+
+#define INIT_SND_CONTROL_BYTES(c, cname, cget, cput, cint, pval, pdata)     \
+    {                                                                       \
+        c->iface = SNDRV_CTL_ELEM_IFACE_MIXER;                              \
+        c->access = SNDRV_CTL_ELEM_ACCESS_READWRITE;                        \
+        c->type = SNDRV_CTL_ELEM_TYPE_BYTES;                                \
+        c->name = cname; c->value = &cint; c->get = cget; c->put = cput;    \
+        c->private_value = pval; c->private_data = pdata;                   \
+    }
+
+#define INIT_SND_CONTROL_ENUM(c, cname, cget, cput, cenum, pval, pdata)     \
+    {                                                                       \
+        c->iface = SNDRV_CTL_ELEM_IFACE_MIXER;                              \
+        c->access = SNDRV_CTL_ELEM_ACCESS_READWRITE;                        \
+        c->type = SNDRV_CTL_ELEM_TYPE_ENUMERATED;                           \
+        c->name = cname; c->value = cenum; c->get = cget; c->put = cput;    \
+        c->private_value = pval; c->private_data = pdata;                   \
+    }
+
+#define INIT_SND_CONTROL_TLV_BYTES(c, cname, cbytes, priv_val, priv_data)  \
+    {                                                                      \
+        c->iface = SNDRV_CTL_ELEM_IFACE_MIXER;                             \
+        c->access = SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE;                   \
+        c->type = SNDRV_CTL_ELEM_TYPE_BYTES;                               \
+        c->name = cname; c->value = &cbytes;                               \
+        c->private_value = priv_val; c->private_data = priv_data;          \
+    }
+
+struct snd_value_enum {
+    unsigned int items;
+    char **texts;
+};
+
+struct snd_value_bytes {
+    unsigned int size;
+};
+
+struct snd_value_tlv_bytes {
+    unsigned int size;
+    int (*get) (struct mixer_plugin *plugin,
+                struct snd_control *control,
+                struct snd_ctl_tlv *tlv);
+    int (*put) (struct mixer_plugin *plugin,
+                struct snd_control *control,
+                struct snd_ctl_tlv *tlv);
+};
+
+struct snd_value_int {
+    unsigned int count;
+    int min;
+    int max;
+    int step;
+};
 
 /** Encapulates the mixer plugin specific data */
 struct mixer_plug_data {
@@ -423,7 +545,7 @@ int mixer_plugin_open(unsigned int card, void **data,
         return -ENOMEM;
 
     /* mixer id is fixed to 1 in snd-card-def xml */
-    plug_data->mixer_node = snd_utils_open_dev_node(card, 1, NODE_MIXER);
+    plug_data->mixer_node = snd_utils_open_mixer(card);
     if (!plug_data->mixer_node) {
         /* Do not print error here.
          * It is valid for card to not have virtual mixer node

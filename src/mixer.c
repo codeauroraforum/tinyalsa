@@ -58,6 +58,7 @@
 #include <sound/asound.h>
 
 #include <tinyalsa/mixer.h>
+#include <tinyalsa/plugin.h>
 
 #include "mixer_io.h"
 

@@ -1,4 +1,4 @@
-/* pcm_plugin.h
+/* plugin.h
 ** Copyright (c) 2019, The Linux Foundation.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -27,29 +27,15 @@
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-#ifndef __PCM_PLUGIN_H__
-#define __PCM_PLUGIN_H__
+#ifndef TINYALSA_PLUGIN_H
+#define TINYALSA_PLUGIN_H
 
-/** Macro to create entry point function for the plugin.
- * @ingroup libtinyalsa-pcm
- */
-#define PCM_PLUGIN_OPEN_FN(name)                    \
-    int name##_open(struct pcm_plugin **plugin,     \
-                    unsigned int card,              \
-                    unsigned int device,            \
-                    int mode)
-/** Macro to create function pointer to the plugin's
- * entry point function.
- * @ingroup libtinyalsa-pcm
- */
-#define PCM_PLUGIN_OPEN_FN_PTR()                        \
-    int (*plugin_open_fn) (struct pcm_plugin **plugin,  \
-                           unsigned int card,           \
-                           unsigned int device,         \
-                           int mode);
-/** Forward declaration of the structure to hold pcm
- * plugin related data/information.
- */
+#include <stdint.h>
+#include <stdlib.h>
+
+#include <sound/asound.h>
+
+struct mixer_plugin;
 struct pcm_plugin;
 
 /** Operations that are required to be registered by the plugin.
@@ -135,4 +121,60 @@ struct pcm_plugin {
     unsigned int state;
 };
 
-#endif /* end of __PCM_PLUGIN_H__ */
+typedef void (*mixer_event_callback)(struct mixer_plugin *);
+
+struct mixer_plugin_ops {
+    void (*close) (struct mixer_plugin **plugin);
+    int (*subscribe_events) (struct mixer_plugin *plugin,
+                             mixer_event_callback event_cb);
+    ssize_t (*read_event) (struct mixer_plugin *plugin,
+                           struct snd_ctl_event *ev, size_t size);
+};
+
+struct snd_control {
+    snd_ctl_elem_iface_t iface;
+    unsigned int access;
+    const char *name;
+    snd_ctl_elem_type_t type;
+    void *value;
+    int (*get) (struct mixer_plugin *plugin,
+                struct snd_control *control,
+                struct snd_ctl_elem_value *ev);
+    int (*put) (struct mixer_plugin *plugin,
+                struct snd_control *control,
+                struct snd_ctl_elem_value *ev);
+    uint32_t private_value;
+    void *private_data;
+};
+
+struct mixer_plugin {
+    unsigned int card;
+    struct mixer_plugin_ops *ops;
+    void *priv;
+
+    int eventfd;
+    int subscribed;
+    int event_cnt;
+
+    struct snd_control *controls;
+    unsigned int num_controls;
+};
+
+/** Operations defined by the plugin.
+ * */
+struct snd_node_ops {
+    /** Function pointer to get card definition */
+    void* (*open_card)(unsigned int card);
+    /** Function pointer to release card definition */
+    void (*close_card)(void *card);
+    /** Function pointer to get PCM definition */
+    void* (*get_pcm)(void *card, unsigned int id);
+    /** Function pointer to get mixer definition */
+    void* (*get_mixer)(void *card);
+    /** Get interger type properties from device definition */
+    int (*get_int)(void *node, const char *prop, int *val);
+    /** Get string type properties from device definition */
+    int (*get_str)(void *node, const char *prop, char **val);
+};
+
+#endif /* end of TINYALSA_PLUGIN_H */

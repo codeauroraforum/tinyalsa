@@ -42,7 +42,7 @@
 #include <linux/ioctl.h>
 #include <sound/asound.h>
 #include <tinyalsa/asoundlib.h>
-#include <tinyalsa/pcm_plugin.h>
+#include <tinyalsa/plugin.h>
 
 #include "pcm_io.h"
 #include "snd_card_plugin.h"
@@ -54,6 +54,25 @@
 
 #define PCM_PARAM_GET_MASK(p, n)    \
     &p->masks[n - SNDRV_PCM_HW_PARAM_FIRST_MASK];
+
+/** Macro to create entry point function for the plugin.
+ * @ingroup libtinyalsa-pcm
+ */
+#define PCM_PLUGIN_OPEN_FN(name)                    \
+    int name##_open(struct pcm_plugin **plugin,     \
+                    unsigned int card,              \
+                    unsigned int device,            \
+                    int mode)
+
+/** Macro to create function pointer to the plugin's
+ * entry point function.
+ * @ingroup libtinyalsa-pcm
+ */
+#define PCM_PLUGIN_OPEN_FN_PTR()                        \
+    int (*plugin_open_fn) (struct pcm_plugin **plugin,  \
+                           unsigned int card,           \
+                           unsigned int device,         \
+                           int mode);
 
 enum {
     PCM_PLUG_HW_PARAM_SELECT_MIN,

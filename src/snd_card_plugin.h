@@ -30,6 +30,8 @@
 #ifndef TINYALSA_SRC_SND_CARD_UTILS_H
 #define TINYALSA_SRC_SND_CARD_UTILS_H
 
+#include <tinyalsa/plugin.h>
+
 #include <dlfcn.h>
 
 /** Encapsulates the pcm device definition from
@@ -42,22 +44,8 @@ struct snd_node {
     void *dev_node;
     /** Pointer to the sound card parser library */
     void *dl_hdl;
-    /** Function pointer to get card definition */
-    void* (*open_card) (unsigned int card);
-    /** Function pointer to release card definition */
-    void (*close_card) (void *card);
-    /** Function pointer to get device (either PCM or Mixer) definition */
-    void* (*get_node) (void *card, unsigned int id,
-                      int type);
-    /** Get interger type properties from device definition */
-    int (*get_int) (void *node, const char *prop, int *val);
-    /** Get string type properties from device definition */
-    int (*get_str) (void *node, const char *prop, char **val);
-};
-
-enum {
-    NODE_PCM,
-    NODE_MIXER,
+    /** A pointer to the operations structure. */
+    const struct snd_node_ops* ops;
 };
 
 enum snd_node_type {
@@ -66,8 +54,14 @@ enum snd_node_type {
     SND_NODE_TYPE_INVALID,
 };
 
-struct snd_node *snd_utils_open_dev_node(unsigned int card,
-        unsigned int device, int dev_type);
+enum {
+  NODE_PCM,
+  NODE_MIXER
+};
+
+struct snd_node *snd_utils_open_pcm(unsigned int card, unsigned int device);
+
+struct snd_node *snd_utils_open_mixer(unsigned int card);
 
 void snd_utils_close_dev_node(struct snd_node *node);
 

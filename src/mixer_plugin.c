@@ -410,7 +410,7 @@ static int mixer_plug_ioctl(void *data, unsigned int cmd, ...)
     return ret;
 }
 
-static struct mixer_ops mixer_plug_ops = {
+static const struct mixer_ops mixer_plug_ops = {
     .close = mixer_plug_close,
     .read_event = mixer_plug_read_event,
     .get_poll_fd = mixer_plug_get_poll_fd,

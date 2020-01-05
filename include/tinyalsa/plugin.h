@@ -158,7 +158,7 @@ struct pcm_plugin {
     /** Card number for the pcm device */
     unsigned int card;
     /** pointer to plugin operation */
-    struct pcm_plugin_ops *ops;
+    const struct pcm_plugin_ops *ops;
     /** pointer to the contraints registered by the plugin */
     struct pcm_plugin_hw_constraints *constraints;
     /** pointer to pcm node under snd card definition */
@@ -199,7 +199,7 @@ struct snd_control {
 
 struct mixer_plugin {
     unsigned int card;
-    struct mixer_plugin_ops *ops;
+    const struct mixer_plugin_ops *ops;
     void *priv;
 
     int eventfd;

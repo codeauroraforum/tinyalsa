@@ -32,9 +32,11 @@
 
 #include <sound/asound.h>
 
+struct snd_node;
+
 struct pcm_ops {
     int (*open) (unsigned int card, unsigned int device,
-                 unsigned int flags, void **data, void *node);
+                 unsigned int flags, void **data, struct snd_node *node);
     void (*close) (void *data);
     int (*ioctl) (void *data, unsigned int cmd, ...);
 };

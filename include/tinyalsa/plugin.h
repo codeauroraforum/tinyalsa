@@ -86,6 +86,7 @@
 
 struct mixer_plugin;
 struct pcm_plugin;
+struct snd_node;
 
 /** Operations that are required to be registered by the plugin.
  * @ingroup libtinyalsa-pcm
@@ -161,7 +162,7 @@ struct pcm_plugin {
     /** pointer to the contraints registered by the plugin */
     struct pcm_plugin_hw_constraints *constraints;
     /** pointer to pcm node under snd card definition */
-    void *node;
+    struct snd_node *node;
     /** Indicates read/write mode, etc.. */
     int mode;
     /* Pointer to hold the plugin's private data */

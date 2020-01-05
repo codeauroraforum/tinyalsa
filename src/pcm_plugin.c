@@ -663,7 +663,7 @@ static int pcm_plug_ioctl(void *data, unsigned int cmd, ...)
 }
 
 static int pcm_plug_open(unsigned int card, unsigned int device,
-                  unsigned int flags, void **data, void *pcm_node)
+                         unsigned int flags, void **data, struct snd_node *pcm_node)
 {
     struct pcm_plug_data *plug_data;
     const char *err = NULL;

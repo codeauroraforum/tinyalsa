@@ -242,7 +242,7 @@ struct pcm {
     /** Private data for pcm_hw or pcm_plugin */
     void *data;
     /** Pointer to the pcm node from snd card definition */
-    void *snd_node;
+    struct snd_node *snd_node;
 };
 
 static int oops(struct pcm *pcm, int e, const char *fmt, ...)

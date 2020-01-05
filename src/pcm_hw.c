@@ -51,7 +51,7 @@ struct pcm_hw_data {
     /** File descriptor to the pcm device file node */
     unsigned int fd;
     /** Pointer to the pcm node from snd card definiton */
-    void *node;
+    struct snd_node *node;
 };
 
 static void pcm_hw_close(void *data)
@@ -78,7 +78,7 @@ static int pcm_hw_ioctl(void *data, unsigned int cmd, ...)
 }
 
 static int pcm_hw_open(unsigned int card, unsigned int device,
-                unsigned int flags, void **data, void *node)
+                unsigned int flags, void **data, struct snd_node *node)
 {
     struct pcm_hw_data *hw_data;
     char fn[256];

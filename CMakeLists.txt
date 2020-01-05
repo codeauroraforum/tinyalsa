@@ -13,9 +13,8 @@ set (HDRS
     "include/tinyalsa/version.h"
     "include/tinyalsa/asoundlib.h"
     "include/tinyalsa/pcm.h"
-    "include/tinyalsa/pcm_plugin.h"
-    "include/tinyalsa/mixer.h"
-    "include/tinyalsa/mixer_plugin.h")
+    "include/tinyalsa/plugin.h"
+    "include/tinyalsa/mixer.h")
 
 set (SRCS
     "src/pcm.c"

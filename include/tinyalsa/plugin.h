@@ -35,6 +35,55 @@
 
 #include <sound/asound.h>
 
+/* static initializers */
+
+#define SND_VALUE_ENUM(etexts, eitems)    \
+    {.texts = etexts, .items = eitems}
+
+#define SND_VALUE_BYTES(csize)    \
+    {.size = csize }
+
+#define SND_VALUE_INTEGER(icount, imin, imax, istep) \
+    {.count = icount, .min = imin, .max = imax, .step = istep }
+
+#define SND_VALUE_TLV_BYTES(csize, cget, cput)       \
+    {.size = csize, .get = cget, .put = cput }
+
+#define SND_CONTROL_ENUM(cname, cget, cput, cenum, priv_val, priv_data)   \
+    {    .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                             \
+        .access = SNDRV_CTL_ELEM_ACCESS_READWRITE,                        \
+        .type = SNDRV_CTL_ELEM_TYPE_ENUMERATED,                           \
+        .name = cname, .value = &cenum, .get = cget, .put = cput,         \
+        .private_value = priv_val, .private_data = priv_data,             \
+    }
+
+#define SND_CONTROL_BYTES(cname, cget, cput, cbytes, priv_val, priv_data) \
+    {                                                                     \
+        .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                              \
+        .access = SNDRV_CTL_ELEM_ACCESS_READWRITE,                        \
+        .type = SNDRV_CTL_ELEM_TYPE_BYTES,                                \
+        .name = cname, .value = &cbytes, .get = cget, .put = cput,        \
+        .private_value = priv_val, .private_data = priv_data,             \
+    }
+
+#define SND_CONTROL_INTEGER(cname, cget, cput, cint, priv_val, priv_data) \
+    {                                                                        \
+        .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                                 \
+        .access = SNDRV_CTL_ELEM_ACCESS_READWRITE,                           \
+        .type = SNDRV_CTL_ELEM_TYPE_INTEGER,                                 \
+        .name = cname, .value = &cint, .get = cget, .put = cput,             \
+        .private_value = priv_val, .private_data = priv_data,                \
+    }
+
+#define SND_CONTROL_TLV_BYTES(cname, cbytes, priv_val, priv_data)  \
+    {                                                                        \
+        .iface = SNDRV_CTL_ELEM_IFACE_MIXER,                                 \
+        .access = SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE,                       \
+        .type = SNDRV_CTL_ELEM_TYPE_BYTES,                                   \
+        .name = cname, .value = &cbytes,                                     \
+        .private_value = priv_val, .private_data = priv_data,                \
+    }
+
 struct mixer_plugin;
 struct pcm_plugin;
 
@@ -158,6 +207,32 @@ struct mixer_plugin {
 
     struct snd_control *controls;
     unsigned int num_controls;
+};
+
+struct snd_value_enum {
+    unsigned int items;
+    char **texts;
+};
+
+struct snd_value_bytes {
+    unsigned int size;
+};
+
+struct snd_value_tlv_bytes {
+    unsigned int size;
+    int (*get) (struct mixer_plugin *plugin,
+                struct snd_control *control,
+                struct snd_ctl_tlv *tlv);
+    int (*put) (struct mixer_plugin *plugin,
+                struct snd_control *control,
+                struct snd_ctl_tlv *tlv);
+};
+
+struct snd_value_int {
+    unsigned int count;
+    int min;
+    int max;
+    int step;
 };
 
 /** Operations defined by the plugin.

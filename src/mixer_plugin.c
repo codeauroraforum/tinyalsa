@@ -27,6 +27,8 @@
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+#include <tinyalsa/plugin.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -46,10 +48,18 @@
 #include <linux/ioctl.h>
 #include <sound/asound.h>
 
-#include <tinyalsa/mixer_plugin.h>
-#include "snd_utils.h"
-
+#include "snd_card_plugin.h"
 #include "mixer_io.h"
+
+/** Creates entry point function for the plugin */
+#define MIXER_PLUGIN_OPEN_FN(name)                             \
+    int name##_open(struct mixer_plugin **plugin,              \
+                    unsigned int card)
+
+/** Creates pointer to the entry point function of the plugin */
+#define MIXER_PLUGIN_OPEN_FN_PTR()                              \
+    int (*mixer_plugin_open_fn) (struct mixer_plugin **plugin,  \
+                                 unsigned int card)
 
 /** Encapulates the mixer plugin specific data */
 struct mixer_plug_data {
@@ -400,7 +410,7 @@ static int mixer_plug_ioctl(void *data, unsigned int cmd, ...)
     return ret;
 }
 
-static struct mixer_ops mixer_plug_ops = {
+static const struct mixer_ops mixer_plug_ops = {
     .close = mixer_plug_close,
     .read_event = mixer_plug_read_event,
     .get_poll_fd = mixer_plug_get_poll_fd,
@@ -423,7 +433,7 @@ int mixer_plugin_open(unsigned int card, void **data,
         return -ENOMEM;
 
     /* mixer id is fixed to 1 in snd-card-def xml */
-    plug_data->mixer_node = snd_utils_get_dev_node(card, 1, NODE_MIXER);
+    plug_data->mixer_node = snd_utils_open_mixer(card);
     if (!plug_data->mixer_node) {
         /* Do not print error here.
          * It is valid for card to not have virtual mixer node
@@ -484,7 +494,7 @@ int mixer_plugin_open(unsigned int card, void **data,
     return 0;
 
 err_get_name:
-    snd_utils_put_dev_node(plug_data->mixer_node);
+    snd_utils_close_dev_node(plug_data->mixer_node);
     dlclose(dl_hdl);
 
 err_get_mixer_node:

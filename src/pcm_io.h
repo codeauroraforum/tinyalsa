@@ -1,4 +1,4 @@
-/* pcm.h
+/* pcm_io.h
 ** Copyright (c) 2019, The Linux Foundation.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -27,14 +27,16 @@
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-#ifndef __PCM_H__
-#define __PCM_H__
+#ifndef TINYALSA_SRC_PCM_IO_H
+#define TINYALSA_SRC_PCM_IO_H
 
 #include <sound/asound.h>
 
+struct snd_node;
+
 struct pcm_ops {
     int (*open) (unsigned int card, unsigned int device,
-                 unsigned int flags, void **data, void *node);
+                 unsigned int flags, void **data, struct snd_node *node);
     void (*close) (void *data);
     int (*ioctl) (void *data, unsigned int cmd, ...);
 };
@@ -42,4 +44,4 @@ struct pcm_ops {
 extern const struct pcm_ops hw_ops;
 extern const struct pcm_ops plug_ops;
 
-#endif /* end of __PCM_H__ */
+#endif /* TINYALSA_SRC_PCM_IO_H */

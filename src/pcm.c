@@ -60,7 +60,7 @@
 #include <tinyalsa/pcm.h>
 #include <tinyalsa/limits.h>
 #include "pcm_io.h"
-#include "snd_utils.h"
+#include "snd_card_plugin.h"
 
 #ifndef PARAM_MAX
 #define PARAM_MAX SNDRV_PCM_HW_PARAM_LAST_INTERVAL
@@ -242,7 +242,7 @@ struct pcm {
     /** Private data for pcm_hw or pcm_plugin */
     void *data;
     /** Pointer to the pcm node from snd card definition */
-    void *snd_node;
+    struct snd_node *snd_node;
 };
 
 static int oops(struct pcm *pcm, int e, const char *fmt, ...)
@@ -619,7 +619,7 @@ struct pcm_params *pcm_params_get(unsigned int card, unsigned int device,
 #ifdef TINYALSA_USES_PLUGINS
     if (fd < 0) {
         int pcm_type;
-        snd_node = snd_utils_get_dev_node(card, device, NODE_PCM);
+        snd_node = snd_utils_open_pcm(card, device, NODE_PCM);
         pcm_type = snd_utils_get_node_type(snd_node);
         if (!snd_node || pcm_type != SND_NODE_TYPE_PLUGIN) {
             fprintf(stderr, "no device (hw/plugin) for card(%u), device(%u)",
@@ -627,7 +627,7 @@ struct pcm_params *pcm_params_get(unsigned int card, unsigned int device,
             goto err_open;
         }
         ops = &plug_ops;
-        fd = pcm->ops->open(card, device, flags, &data, snd_node);
+        fd = ops->open(card, device, flags, &data, snd_node);
     }
 #endif
     if (fd < 0) {
@@ -648,7 +648,7 @@ struct pcm_params *pcm_params_get(unsigned int card, unsigned int device,
 
 #ifdef TINYALSA_USES_PLUGINS
     if (snd_node)
-        snd_utils_put_dev_node(snd_node);
+        snd_utils_close_dev_node(snd_node);
 #endif
     ops->close(data);
 
@@ -659,7 +659,7 @@ err_hw_refine:
 err_calloc:
 #ifdef TINYALSA_USES_PLUGINS
     if (snd_node)
-        snd_utils_put_dev_node(snd_node);
+        snd_utils_close_dev_node(snd_node);
 #endif
     ops->close(data);
 err_open:
@@ -816,7 +816,7 @@ int pcm_close(struct pcm *pcm)
         munmap(pcm->mmap_buffer, pcm_frames_to_bytes(pcm, pcm->buffer_size));
     }
 
-    snd_utils_put_dev_node(pcm->snd_node);
+    snd_utils_close_dev_node(pcm->snd_node);
     if (pcm->fd >= 0)
         close(pcm->fd);
     pcm->buffer_size = 0;
@@ -894,7 +894,7 @@ struct pcm *pcm_open(unsigned int card, unsigned int device,
 #ifdef TINYALSA_USES_PLUGINS
     if (pcm->fd < 0) {
         int pcm_type;
-        pcm->snd_node = snd_utils_get_dev_node(card, device, NODE_PCM);
+        pcm->snd_node = snd_utils_open_pcm(card, device, NODE_PCM);
         pcm_type = snd_utils_get_node_type(pcm->snd_node);
         if (!pcm->snd_node || pcm_type != SND_NODE_TYPE_PLUGIN) {
             oops(pcm, -ENODEV, "no device (hw/plugin) for card(%u), device(%u)",
@@ -953,7 +953,7 @@ fail:
 fail_close:
 #ifdef TINYALSA_USES_PLUGINS
     if (pcm->snd_node)
-        snd_utils_put_dev_node(pcm->snd_node);
+        snd_utils_close_dev_node(pcm->snd_node);
 #endif
     pcm->ops->close(pcm->data);
     pcm->fd = -1;

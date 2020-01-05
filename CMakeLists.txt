@@ -2,26 +2,31 @@ cmake_minimum_required(VERSION 3.0.2)
 
 project("TinyALSA" C)
 
+option(TINYALSA_USES_PLUGINS "Whether or not to build with plugin support" OFF)
+
+if (TINYALSA_USES_PLUGINS)
+    set (plugin_opt -DTINYALSA_USES_PLUGINS=1)
+endif (TINYALSA_USES_PLUGINS)
+
 set (HDRS
     "include/tinyalsa/attributes.h"
     "include/tinyalsa/version.h"
     "include/tinyalsa/asoundlib.h"
     "include/tinyalsa/pcm.h"
-    "include/tinyalsa/pcm_plugin.h"
-    "include/tinyalsa/mixer.h"
-    "include/tinyalsa/mixer_plugin.h")
+    "include/tinyalsa/plugin.h"
+    "include/tinyalsa/mixer.h")
 
 set (SRCS
     "src/pcm.c"
     "src/pcm_hw.c"
     "src/pcm_plugin.c"
-    "src/snd_utils.c"
+    "src/snd_card_plugin.c"
     "src/mixer.c"
     "src/mixer_hw.c"
     "src/mixer_plugin.c")
 
 add_library("tinyalsa" ${HDRS} ${SRCS})
-target_compile_options("tinyalsa" PRIVATE -Wall -Wextra -Werror -Wfatal-errors)
+target_compile_options("tinyalsa" PRIVATE -Wall -Wextra -Werror -Wfatal-errors ${plugin_opt})
 target_include_directories("tinyalsa" PRIVATE "include")
 
 macro(ADD_EXAMPLE EXAMPLE)

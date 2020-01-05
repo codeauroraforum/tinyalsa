@@ -42,10 +42,10 @@
 #include <linux/ioctl.h>
 #include <sound/asound.h>
 #include <tinyalsa/asoundlib.h>
-#include <tinyalsa/pcm_plugin.h>
+#include <tinyalsa/plugin.h>
 
 #include "pcm_io.h"
-#include "snd_utils.h"
+#include "snd_card_plugin.h"
 
 /* 2 words of uint32_t = 64 bits of mask */
 #define PCM_MASK_SIZE (2)
@@ -54,6 +54,25 @@
 
 #define PCM_PARAM_GET_MASK(p, n)    \
     &p->masks[n - SNDRV_PCM_HW_PARAM_FIRST_MASK];
+
+/** Macro to create entry point function for the plugin.
+ * @ingroup libtinyalsa-pcm
+ */
+#define PCM_PLUGIN_OPEN_FN(name)                    \
+    int name##_open(struct pcm_plugin **plugin,     \
+                    unsigned int card,              \
+                    unsigned int device,            \
+                    int mode)
+
+/** Macro to create function pointer to the plugin's
+ * entry point function.
+ * @ingroup libtinyalsa-pcm
+ */
+#define PCM_PLUGIN_OPEN_FN_PTR()                        \
+    int (*plugin_open_fn) (struct pcm_plugin **plugin,  \
+                           unsigned int card,           \
+                           unsigned int device,         \
+                           int mode);
 
 enum {
     PCM_PLUG_HW_PARAM_SELECT_MIN,
@@ -644,7 +663,7 @@ static int pcm_plug_ioctl(void *data, unsigned int cmd, ...)
 }
 
 static int pcm_plug_open(unsigned int card, unsigned int device,
-                  unsigned int flags, void **data, void *pcm_node)
+                         unsigned int flags, void **data, struct snd_node *pcm_node)
 {
     struct pcm_plug_data *plug_data;
     const char *err = NULL;

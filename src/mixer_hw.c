@@ -82,7 +82,7 @@ static int mixer_hw_ioctl(void *data, unsigned int cmd, ...)
     return ioctl(hw_data->fd, cmd, arg);
 }
 
-static struct mixer_ops mixer_hw_ops = {
+static const struct mixer_ops mixer_hw_ops = {
     .close = mixer_hw_close,
     .ioctl = mixer_hw_ioctl,
 };
